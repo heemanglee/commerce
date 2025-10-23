@@ -12,8 +12,10 @@ services:
     ports:
       - "3307:3306"
     command:
-      --character-set-server=utf8mb4
-      --collation-server=utf8mb4_general_ci
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_general_ci
+      - --init-connect=SET NAMES utf8mb4 COLLATE utf8mb4_general_ci
+      - --character-set-client-handshake=FALSE
     restart: always
     volumes:
       - mysql-volume:/var/lib/mysql
