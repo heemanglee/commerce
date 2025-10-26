@@ -21,14 +21,19 @@ public class User extends BaseEntity {
     @Column(columnDefinition = "BINARY(16)")
     private UUID id;
 
-    @Column(unique = true)
+    @Column(unique = true, nullable = false)
     private String email;
 
-    @Size(min = 8, max = 16)
+    @Column(nullable = false, unique = true, length = 20)
+    @Size(min = 4, max = 20)
+    private String name;
+
+    @Column(nullable = false)
     private String password;
 
     @Builder
-    public User(String email, String password) {
+    public User(String name, String email, String password) {
+        this.name = name;
         this.email = email;
         this.password = password;
     }

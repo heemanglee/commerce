@@ -23,7 +23,7 @@ public class UserController {
     public ResponseEntity<CreateUserResponse> signUp(
             @Valid @RequestBody CreateUserRequest request
     ) {
-        CreateUserResponse response = userService.createUser(request.email(), request.password());
+        CreateUserResponse response = userService.createUser(request.name(), request.email(), request.password());
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 }

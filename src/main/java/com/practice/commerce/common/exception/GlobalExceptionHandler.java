@@ -51,4 +51,13 @@ public class GlobalExceptionHandler {
         );
         return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
     }
+
+    @ExceptionHandler(DuplicateUserNameException.class)
+    public ResponseEntity<ErrorResponse> handleDuplicateUserNameException(DuplicateUserNameException ex) {
+        ErrorResponse errorResponse = new ErrorResponse(
+                "USER_NAME_ALREADY_EXISTS",
+                ex.getMessage()
+        );
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
+    }
 }

@@ -6,6 +6,10 @@ import jakarta.validation.constraints.Size;
 
 public record CreateUserRequest(
         @NotBlank
+        @Size(min = 4, max = 16)
+        String name,
+
+        @NotBlank
         @Email
         String email,
 
