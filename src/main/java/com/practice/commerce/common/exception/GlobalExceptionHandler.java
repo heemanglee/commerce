@@ -33,4 +33,22 @@ public class GlobalExceptionHandler {
                 ex.getMessage());
         return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
     }
+
+    @ExceptionHandler(NotFoundUserException.class)
+    public ResponseEntity<ErrorResponse> handleNotFoundUserException(NotFoundUserException ex) {
+        ErrorResponse errorResponse = new ErrorResponse(
+                "USER_NOT_FOUND",
+                ex.getMessage()
+        );
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
+
+    @ExceptionHandler(DuplicateProductException.class)
+    public ResponseEntity<ErrorResponse> handleDuplicateProductException(DuplicateProductException ex) {
+        ErrorResponse errorResponse = new ErrorResponse(
+                "PRODUCT_NOT_FOUND",
+                ex.getMessage()
+        );
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
+    }
 }

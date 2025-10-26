@@ -17,6 +17,7 @@ import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.Size;
 import java.time.Instant;
 import java.util.UUID;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -60,4 +61,11 @@ public class Product extends BaseEntity {
 
     private Instant deletedAt = null;
 
+    @Builder
+    public Product(String name, String description, User seller, ProductStatus status) {
+        this.name = name;
+        this.description = description;
+        this.seller = seller;
+        this.status = status;
+    }
 }
