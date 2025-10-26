@@ -1,6 +1,5 @@
 package com.practice.commerce.common.security;
 
-import com.practice.commerce.common.utils.JwtParser;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

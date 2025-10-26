@@ -1,6 +1,6 @@
 package com.practice.commerce;
 
-import com.practice.commerce.common.utils.JwtProperty;
+import com.practice.commerce.common.security.JwtProperty;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;

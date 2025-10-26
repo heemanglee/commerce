@@ -1,4 +1,4 @@
-package com.practice.commerce.common.utils;
+package com.practice.commerce.common.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;

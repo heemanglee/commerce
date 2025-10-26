@@ -3,7 +3,7 @@ package com.practice.commerce.domain.user.service;
 import com.practice.commerce.common.exception.DuplicateUserEmailException;
 import com.practice.commerce.common.exception.DuplicateUserNameException;
 import com.practice.commerce.common.exception.NotFoundUserException;
-import com.practice.commerce.common.utils.JwtIssuer;
+import com.practice.commerce.common.security.JwtIssuer;
 import com.practice.commerce.domain.user.controller.response.CreateUserResponse;
 import com.practice.commerce.domain.user.controller.response.LoginUserResponse;
 import com.practice.commerce.domain.user.entity.Role;
