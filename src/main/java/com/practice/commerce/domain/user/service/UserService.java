@@ -6,6 +6,7 @@ import com.practice.commerce.common.exception.NotFoundUserException;
 import com.practice.commerce.common.utils.JwtIssuer;
 import com.practice.commerce.domain.user.controller.response.CreateUserResponse;
 import com.practice.commerce.domain.user.controller.response.LoginUserResponse;
+import com.practice.commerce.domain.user.entity.Role;
 import com.practice.commerce.domain.user.entity.User;
 import com.practice.commerce.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +27,7 @@ public class UserService {
     private final RefreshTokenService refreshTokenService;
 
     @Transactional
-    public CreateUserResponse createUser(String name, String email, String password) {
+    public CreateUserResponse createUser(String name, String email, String password, Role role) {
         validateUserNameAndEmail(name, email);
 
         String encodedPassword = passwordEncoder.encode(password);
@@ -34,6 +35,7 @@ public class UserService {
         User user = User.builder()
                 .name(name)
                 .email(email)
+                .role(role)
                 .password(encodedPassword)
                 .build();
         User savedUser = userRepository.save(user);

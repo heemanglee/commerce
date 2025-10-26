@@ -31,7 +31,7 @@ public class JwtIssuer {
                 .header()
                 .type("Bearer")
                 .and()
-                .subject(user.getEmail())
+                .subject(user.getId().toString())
                 .claims(claims)
                 .issuedAt(Date.from(now))
                 .expiration(Date.from(now.plusSeconds(property.accessTtlSeconds())))
@@ -44,7 +44,7 @@ public class JwtIssuer {
         Map<String, Object> claims = generateClaims(user);
 
         return Jwts.builder()
-                .subject(user.getEmail())
+                .subject(user.getId().toString())
                 .issuedAt(Date.from(now))
                 .expiration(Date.from(now.plusSeconds(property.refreshTtlSeconds())))
                 .signWith(key(), SIG.HS256)
@@ -53,8 +53,9 @@ public class JwtIssuer {
 
     private static Map<String, Object> generateClaims(User user) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put("id", user.getId());
+        claims.put("email", user.getEmail());
         claims.put("name", user.getName());
+        claims.put("role", user.getRole());
         return claims;
     }
 

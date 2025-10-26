@@ -53,10 +53,9 @@ public class ProductService {
     }
 
     @Transactional(readOnly = true)
-    public GetProductResponse getProduct(UUID productId, UUID sellerId) {
-        User seller = getSeller(sellerId);
-        Product product = productRepository.findProductByIdAndSeller(productId, seller);
-
+    public GetProductResponse getProduct(UUID productId) {
+        Product product = productRepository.findProductById(productId)
+                .orElseThrow(() -> new IllegalArgumentException("상품 조회에 실패했습니다. id = " + productId));
         return GetProductResponse.of(product);
     }
 

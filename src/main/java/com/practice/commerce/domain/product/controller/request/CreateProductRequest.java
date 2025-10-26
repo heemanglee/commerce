@@ -15,9 +15,6 @@ public record CreateProductRequest(
         String description,
 
         @NotNull
-        UUID sellerId,
-
-        @NotNull
         UUID categoryId,
 
         @NotNull

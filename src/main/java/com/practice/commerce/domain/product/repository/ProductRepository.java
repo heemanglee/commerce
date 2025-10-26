@@ -2,6 +2,7 @@ package com.practice.commerce.domain.product.repository;
 
 import com.practice.commerce.domain.product.entity.Product;
 import com.practice.commerce.domain.user.entity.User;
+import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,4 +17,6 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
     Product findProductByIdAndSeller(UUID productId, User seller);
 
     Page<Product> findProductsBySeller(User seller, Pageable pageable);
+
+    Optional<Product> findProductById(UUID productId);
 }

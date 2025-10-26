@@ -13,6 +13,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,32 +29,34 @@ public class ProductController {
 
     private final ProductService productService;
 
+    @PreAuthorize("hasRole('SELLER')")
     @PostMapping
     public ResponseEntity<CreateProductResponse> createProduct(
-            @Valid @RequestBody CreateProductRequest request
+            @Valid @RequestBody CreateProductRequest request,
+            @AuthenticationPrincipal UUID sellerId
     ) {
         CreateProductResponse response = productService.createProduct(
                 request.name(),
                 request.description(),
-                request.sellerId(),
+                sellerId,
                 request.categoryId(),
                 request.status()
         );
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @GetMapping("/{product_id}/{seller_id}")
+    @PreAuthorize("hasRole('SELLER')")
+    @GetMapping("/{product_id}")
     public ResponseEntity<GetProductResponse> getProduct(
-            @PathVariable("product_id") UUID productId,
-            @PathVariable("seller_id") UUID sellerId
+            @PathVariable("product_id") UUID productId
     ) {
-        GetProductResponse response = productService.getProduct(productId, sellerId);
+        GetProductResponse response = productService.getProduct(productId);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    @GetMapping("/{seller_id}")
+    @GetMapping
     public ResponseEntity<List<GetProductResponse>> getProducts(
-            @PathVariable("seller_id") UUID sellerId,
+            @AuthenticationPrincipal UUID sellerId,
             @PageableDefault(
                     page = 0,
                     size = 10,
