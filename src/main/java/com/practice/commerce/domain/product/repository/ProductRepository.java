@@ -4,7 +4,7 @@ import com.practice.commerce.domain.product.entity.Product;
 import com.practice.commerce.domain.user.entity.User;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -15,5 +15,5 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
 
     Product findProductByIdAndSeller(UUID productId, User seller);
 
-    Page<Product> findProductsBySeller(User seller, PageRequest pageable);
+    Page<Product> findProductsBySeller(User seller, Pageable pageable);
 }

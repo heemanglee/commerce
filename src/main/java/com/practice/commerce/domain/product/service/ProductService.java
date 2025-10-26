@@ -16,9 +16,7 @@ import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -63,13 +61,11 @@ public class ProductService {
     }
 
     @Transactional(readOnly = true)
-    public List<GetProductResponse> getProducts(UUID sellerId, int offset, int limit) {
+    public List<GetProductResponse> getProducts(UUID sellerId, Pageable pageable) {
         User seller = getSeller(sellerId);
 
-        int page = offset / Math.max(1, limit);
-        PageRequest pageable = PageRequest.of(page, limit, Sort.by(Direction.ASC, "createdAt"));
-
         Page<Product> pageResult = productRepository.findProductsBySeller(seller, pageable);
+
         return pageResult.stream()
                 .map(GetProductResponse::of)
                 .toList();
