@@ -1,6 +1,7 @@
 package com.practice.commerce.domain.user.repository;
 
 import com.practice.commerce.domain.user.entity.User;
+import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -10,4 +11,6 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     boolean existsByEmail(String email);
 
     boolean existsByName(String name);
+
+    Optional<User> findByEmail(String email);
 }

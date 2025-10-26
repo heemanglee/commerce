@@ -18,6 +18,17 @@ spring:
     open-in-view: false
     show-sql: true
 
+  data:
+    redis:
+      host: localhost
+      port: 6380
+
+  security:
+    jwt:
+      secret-key: "+pI6fxTOdlPIAxaDPR30kfudnkjBkS25lD69kEZNv6iSzdv0ve1ChHj3fpSkIbwWtvq68lGjTtXFrIoGgxVCaQ=="
+      access-ttl-seconds: 3600 # 1시간
+      refresh-ttl-seconds: 86400 # 24시간
+
 logging:
   level:
     org.springframework.web: INFO

@@ -30,7 +30,7 @@ public class SecurityConfig {
                         // 인증 제외
                         .requestMatchers(
                                 "/users/sign-up",
-                                "/users/login"
+                                "/users/sign-in"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
