@@ -1,6 +1,6 @@
-package com.practice.commerce.common.service;
+package com.practice.commerce.infrastructure.s3;
 
-import com.practice.commerce.common.config.S3Properties;
+import com.practice.commerce.infrastructure.config.S3Properties;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

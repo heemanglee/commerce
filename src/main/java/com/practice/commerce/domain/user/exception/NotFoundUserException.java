@@ -1,4 +1,4 @@
-package com.practice.commerce.common.exception;
+package com.practice.commerce.domain.user.exception;
 
 public class NotFoundUserException extends RuntimeException {
     public NotFoundUserException() {

@@ -1,4 +1,4 @@
-package com.practice.commerce.common.security;
+package com.practice.commerce.infrastructure.security;
 
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;

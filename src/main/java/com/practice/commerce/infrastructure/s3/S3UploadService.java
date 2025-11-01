@@ -1,10 +1,10 @@
-package com.practice.commerce.common.service;
+package com.practice.commerce.infrastructure.s3;
 
-import com.practice.commerce.common.config.S3Properties;
-import com.practice.commerce.common.exception.FileUploadException;
+import com.practice.commerce.infrastructure.config.S3Properties;
 import com.practice.commerce.domain.product.entity.MediaType;
 import com.practice.commerce.domain.product.entity.Product;
 import com.practice.commerce.domain.product.service.ProductMediaService;
+import com.practice.commerce.infrastructure.s3.exception.FileUploadException;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ArrayList;

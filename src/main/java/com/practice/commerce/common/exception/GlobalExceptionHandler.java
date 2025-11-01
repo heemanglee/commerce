@@ -1,5 +1,12 @@
 package com.practice.commerce.common.exception;
 
+import com.practice.commerce.domain.category.exception.DuplicateCategoryNameException;
+import com.practice.commerce.domain.category.exception.NotFoundCategoryException;
+import com.practice.commerce.domain.product.exception.DuplicateProductException;
+import com.practice.commerce.domain.user.exception.DuplicateUserEmailException;
+import com.practice.commerce.domain.user.exception.DuplicateUserNameException;
+import com.practice.commerce.domain.user.exception.NotFoundUserException;
+import com.practice.commerce.infrastructure.s3.exception.FileUploadException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;

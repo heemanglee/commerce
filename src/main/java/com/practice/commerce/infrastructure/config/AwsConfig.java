@@ -1,4 +1,4 @@
-package com.practice.commerce.common.config;
+package com.practice.commerce.infrastructure.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

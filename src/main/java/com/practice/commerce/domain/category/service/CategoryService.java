@@ -1,7 +1,7 @@
 package com.practice.commerce.domain.category.service;
 
-import com.practice.commerce.common.exception.DuplicateCategoryNameException;
-import com.practice.commerce.common.exception.NotFoundCategoryException;
+import com.practice.commerce.domain.category.exception.DuplicateCategoryNameException;
+import com.practice.commerce.domain.category.exception.NotFoundCategoryException;
 import com.practice.commerce.domain.category.controller.request.CategoryStatusRequest;
 import com.practice.commerce.domain.category.controller.response.CategoryStatusResponse;
 import com.practice.commerce.domain.category.controller.response.CreateCategoryResponse;

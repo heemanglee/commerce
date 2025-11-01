@@ -1,4 +1,4 @@
-package com.practice.commerce.common.security;
+package com.practice.commerce.infrastructure.security;
 
 import com.practice.commerce.domain.user.entity.User;
 import io.jsonwebtoken.Jwts;

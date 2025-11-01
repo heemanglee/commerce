@@ -1,4 +1,4 @@
-package com.practice.commerce.common.exception;
+package com.practice.commerce.domain.category.exception;
 
 public class DuplicateCategoryNameException extends RuntimeException {
 

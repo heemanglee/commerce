@@ -1,6 +1,6 @@
-package com.practice.commerce.common.config;
+package com.practice.commerce.infrastructure.config;
 
-import com.practice.commerce.common.security.JwtAuthenticationFilter;
+import com.practice.commerce.infrastructure.security.JwtAuthenticationFilter;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
