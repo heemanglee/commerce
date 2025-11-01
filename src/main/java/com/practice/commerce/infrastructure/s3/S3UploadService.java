@@ -51,11 +51,6 @@ public class S3UploadService {
 
                 // 메타데이터 추출 (width/height)
                 ImageMeta meta = readImageMeta(file);
-
-                // S3 업로드
-                if (pos == 1) {
-                    throw new IllegalArgumentException("업로드 강제 실패");
-                }
                 s3ObjectUploader.uploadFile(objectKey, file, contentType);
                 uploadedKeys.add(objectKey);
 

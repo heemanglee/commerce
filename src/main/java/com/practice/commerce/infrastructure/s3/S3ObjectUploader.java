@@ -1,6 +1,7 @@
 package com.practice.commerce.infrastructure.s3;
 
 import com.practice.commerce.infrastructure.config.S3Properties;
+import com.practice.commerce.infrastructure.s3.exception.FileUploadException;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,10 +41,10 @@ public class S3ObjectUploader {
         log.info("S3 putObject success: {}", objectKey);
     }
 
-    // 모든 재시도 실패 시 호출되어 사위 트랜잭션 롤백 처리
+    // 이미지 업로드 하나라도 실패할 시 상품 등록 취소
     @Recover
     public void recover(Exception e, String key, MultipartFile file, String contentType) {
         log.error("S3 putObject failed: {}", key, e);
-        throw new RuntimeException("S3 putObject failed: " + key, e);
+        throw new FileUploadException("S3 putObject failed: " + key, e);
     }
 }
