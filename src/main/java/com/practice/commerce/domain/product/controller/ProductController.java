@@ -5,6 +5,7 @@ import com.practice.commerce.domain.product.controller.response.CreateProductRes
 import com.practice.commerce.domain.product.controller.response.GetProductResponse;
 import com.practice.commerce.domain.product.service.ProductService;
 import jakarta.validation.Valid;
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -20,7 +22,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @RequiredArgsConstructor
 @RestController
@@ -30,17 +35,20 @@ public class ProductController {
     private final ProductService productService;
 
     @PreAuthorize("hasRole('SELLER')")
-    @PostMapping
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<CreateProductResponse> createProduct(
-            @Valid @RequestBody CreateProductRequest request,
+            @Valid @RequestPart("data") CreateProductRequest request,
+            @RequestPart(value="files", required = false) List<MultipartFile> files,
             @AuthenticationPrincipal UUID sellerId
-    ) {
+    ) throws IOException {
+        // TODO: 예외 처리 위치 변경
         CreateProductResponse response = productService.createProduct(
                 request.name(),
                 request.description(),
                 sellerId,
                 request.categoryId(),
-                request.status()
+                request.status(),
+                files
         );
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }

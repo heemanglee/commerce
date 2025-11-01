@@ -39,6 +39,10 @@ dependencies {
     // Redis
     implementation("org.springframework.boot:spring-boot-starter-data-redis")
 
+    // AWS
+    implementation platform('software.amazon.awssdk:bom:2.25.50')
+    implementation 'software.amazon.awssdk:s3'
+
 	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'com.mysql:mysql-connector-j'
 	annotationProcessor 'org.projectlombok:lombok'

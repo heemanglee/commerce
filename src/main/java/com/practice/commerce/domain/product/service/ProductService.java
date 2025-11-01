@@ -12,6 +12,7 @@ import com.practice.commerce.domain.product.entity.ProductStatus;
 import com.practice.commerce.domain.product.repository.ProductRepository;
 import com.practice.commerce.domain.user.entity.User;
 import com.practice.commerce.domain.user.repository.UserRepository;
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @RequiredArgsConstructor
 @Service
@@ -27,6 +29,7 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
+    private final ProductMediaService productMediaService;
 
     @Transactional
     public CreateProductResponse createProduct(
@@ -34,8 +37,9 @@ public class ProductService {
             String description,
             UUID sellerId,
             UUID categoryId,
-            ProductStatus status
-    ) {
+            ProductStatus status,
+            List<MultipartFile> files
+    ) throws IOException {
         User seller = getSeller(sellerId);
         validateDuplicateProduct(name, seller);
 
@@ -48,6 +52,9 @@ public class ProductService {
                 .status(status)
                 .build();
         Product savedProduct = productRepository.save(product);
+
+        // 이미지 업로드
+        productMediaService.uploadImages(product, files);
 
         return new CreateProductResponse(savedProduct.getId());
     }
