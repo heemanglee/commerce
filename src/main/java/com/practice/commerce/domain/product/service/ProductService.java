@@ -3,6 +3,7 @@ package com.practice.commerce.domain.product.service;
 import com.practice.commerce.common.exception.DuplicateProductException;
 import com.practice.commerce.common.exception.NotFoundCategoryException;
 import com.practice.commerce.common.exception.NotFoundUserException;
+import com.practice.commerce.common.service.S3UploadService;
 import com.practice.commerce.domain.category.entity.Category;
 import com.practice.commerce.domain.category.repository.CategoryRepository;
 import com.practice.commerce.domain.product.controller.response.CreateProductResponse;
@@ -12,7 +13,6 @@ import com.practice.commerce.domain.product.entity.ProductStatus;
 import com.practice.commerce.domain.product.repository.ProductRepository;
 import com.practice.commerce.domain.user.entity.User;
 import com.practice.commerce.domain.user.repository.UserRepository;
-import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +29,7 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
-    private final ProductMediaService productMediaService;
+    private final S3UploadService s3UploadService;
 
     @Transactional
     public CreateProductResponse createProduct(
@@ -39,7 +39,7 @@ public class ProductService {
             UUID categoryId,
             ProductStatus status,
             List<MultipartFile> files
-    ) throws IOException {
+    ) {
         User seller = getSeller(sellerId);
         validateDuplicateProduct(name, seller);
 
@@ -54,7 +54,7 @@ public class ProductService {
         Product savedProduct = productRepository.save(product);
 
         // 이미지 업로드
-        productMediaService.uploadImages(product, files);
+        s3UploadService.upload(product, files);
 
         return new CreateProductResponse(savedProduct.getId());
     }

@@ -5,7 +5,6 @@ import com.practice.commerce.domain.product.controller.response.CreateProductRes
 import com.practice.commerce.domain.product.controller.response.GetProductResponse;
 import com.practice.commerce.domain.product.service.ProductService;
 import jakarta.validation.Valid;
-import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -20,9 +19,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -38,10 +35,9 @@ public class ProductController {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<CreateProductResponse> createProduct(
             @Valid @RequestPart("data") CreateProductRequest request,
-            @RequestPart(value="files", required = false) List<MultipartFile> files,
+            @RequestPart(value = "files", required = false) List<MultipartFile> files,
             @AuthenticationPrincipal UUID sellerId
-    ) throws IOException {
-        // TODO: 예외 처리 위치 변경
+    ) {
         CreateProductResponse response = productService.createProduct(
                 request.name(),
                 request.description(),

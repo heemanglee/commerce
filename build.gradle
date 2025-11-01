@@ -30,6 +30,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-aop'
 
     // JWT
     implementation("io.jsonwebtoken:jjwt-api:0.13.0")
@@ -42,6 +43,9 @@ dependencies {
     // AWS
     implementation platform('software.amazon.awssdk:bom:2.25.50')
     implementation 'software.amazon.awssdk:s3'
+
+    // Retry
+    implementation 'org.springframework.retry:spring-retry'
 
 	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'com.mysql:mysql-connector-j'
