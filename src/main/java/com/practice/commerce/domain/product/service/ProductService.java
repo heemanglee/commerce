@@ -11,6 +11,7 @@ import com.practice.commerce.domain.product.entity.ProductMedia;
 import com.practice.commerce.domain.product.entity.ProductStatus;
 import com.practice.commerce.domain.product.exception.DuplicateProductException;
 import com.practice.commerce.domain.product.exception.InvalidProductMediaException;
+import com.practice.commerce.domain.product.exception.NotFoundProductException;
 import com.practice.commerce.domain.product.repository.ProductMediaRepository;
 import com.practice.commerce.domain.product.repository.ProductRepository;
 import com.practice.commerce.domain.user.entity.User;
@@ -38,6 +39,8 @@ public class ProductService {
     private final S3UploadService s3UploadService;
     private final ProductMediaRepository productMediaRepository;
 
+    private static final int TEMP_POSITION_START = 1000;
+
     @Transactional
     public CreateProductResponse createProduct(
             String name,
@@ -61,15 +64,14 @@ public class ProductService {
         Product savedProduct = productRepository.save(product);
 
         // 이미지 업로드
-        s3UploadService.upload(product, files);
+        s3UploadService.upload(product, files, 0);
 
         return new CreateProductResponse(savedProduct.getId());
     }
 
     @Transactional(readOnly = true)
     public GetProductResponse getProduct(UUID productId) {
-        Product product = productRepository.findProductById(productId)
-                .orElseThrow(() -> new IllegalArgumentException("상품 조회에 실패했습니다. id = " + productId));
+        Product product = getProductById(productId);
         return GetProductResponse.of(product);
     }
 
@@ -85,12 +87,65 @@ public class ProductService {
     }
 
     @Transactional
-    public void updateMediaPositions(UUID productId, List<MediaPosition> mediaPositions) {
-        List<ProductMedia> productMedias = getAndValidateProductMedias(productId, mediaPositions);
+    public void updateProductMedia(UUID productId, List<MediaPosition> mediaPositions, List<MultipartFile> files) {
+        Product product = getProductById(productId);
 
-        // 각 미디어의 position 업데이트
-        // (product_id, positon)은 uk로 설정되어 있으므로 이미지의 position을 임시 값으로 변경함.
-        int tempPosition = 100;
+        boolean hasFiles = hasFiles(files);
+        boolean hasMediaPositions = hasMediaPositions(mediaPositions);
+
+        if (hasFiles && hasMediaPositions) {
+            addNewMediaAndUpdatePosition(mediaPositions, files, product);
+        } else if (hasMediaPositions) {
+            updatePosition(mediaPositions, product);
+        } else {
+            addNewMediaOnly(product, files);
+        }
+
+        throw new InvalidProductMediaException(
+                "INVALID_REQUEST",
+                "새로운 이미지 또는 순서 정보 중 하나는 제공되어야 합니다."
+        );
+    }
+
+    private void updatePosition(List<MediaPosition> mediaPositions, Product product) {
+        List<ProductMedia> productMedias = getAndValidateProductMedias(product.getId(), mediaPositions);
+        reorderMediaOnly(mediaPositions, productMedias);
+    }
+
+    private void addNewMediaAndUpdatePosition(List<MediaPosition> mediaPositions, List<MultipartFile> files,
+                                              Product product) {
+        updatePosition(mediaPositions, product);
+        productMediaRepository.flush();
+
+        addNewMediaOnly(product, files);
+    }
+
+    private Product getProductById(UUID productId) {
+        return productRepository.findById(productId)
+                .orElseThrow(() -> new NotFoundProductException("상품 조회에 실패했습니다. id = " + productId));
+    }
+
+    private boolean hasMediaPositions(List<MediaPosition> mediaPositions) {
+        return mediaPositions != null && !mediaPositions.isEmpty();
+    }
+
+    private boolean hasFiles(List<MultipartFile> files) {
+        return files != null && !files.isEmpty();
+    }
+
+    private void addNewMediaOnly(Product product, List<MultipartFile> files) {
+        if (files == null || files.isEmpty()) {
+            return;
+        }
+
+        // 상품에 등록된 이미지 중에서 가장 마지막 position 계산
+        Integer lastPosition = productMediaRepository.findLastIdxByProductId(product.getId());
+        s3UploadService.upload(product, files, lastPosition + 1);
+    }
+
+    private void reorderMediaOnly(List<MediaPosition> mediaPositions, List<ProductMedia> productMedias) {
+        int tempPosition = TEMP_POSITION_START;
+
         Map<UUID, ProductMedia> mediaMap = new HashMap<>();
         for (ProductMedia productMedia : productMedias) {
             mediaMap.put(productMedia.getId(), productMedia);

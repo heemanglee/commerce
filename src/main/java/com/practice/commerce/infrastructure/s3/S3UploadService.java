@@ -1,9 +1,9 @@
 package com.practice.commerce.infrastructure.s3;
 
-import com.practice.commerce.infrastructure.config.S3Properties;
 import com.practice.commerce.domain.product.entity.MediaType;
 import com.practice.commerce.domain.product.entity.Product;
 import com.practice.commerce.domain.product.service.ProductMediaService;
+import com.practice.commerce.infrastructure.config.S3Properties;
 import com.practice.commerce.infrastructure.s3.exception.FileUploadException;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -31,7 +31,7 @@ public class S3UploadService {
     private final ProductMediaService productMediaService;
     private final S3ObjectUploader s3ObjectUploader;
 
-    public void upload(Product product, List<MultipartFile> files) {
+    public void upload(Product product, List<MultipartFile> files, int position) {
         if (files == null || files.isEmpty()) {
             return;
         }
@@ -46,7 +46,7 @@ public class S3UploadService {
                 String extension = getExtension(file, contentType);
                 String objectKey = String.format(
                         "products/%s/images/%02d-%s.%s",
-                        product.getId(), pos, UUID.randomUUID(), extension
+                        product.getId(), pos + position, UUID.randomUUID(), extension
                 );
 
                 // 메타데이터 추출 (width/height)
@@ -58,7 +58,7 @@ public class S3UploadService {
                 productMediaService.create(
                         product, MediaType.IMAGE,
                         s3Properties.getBucket(), objectKey,
-                        pos, meta.width(), meta.height()
+                        pos + position, meta.width(), meta.height()
                 );
             }
         } catch (Exception ex) {

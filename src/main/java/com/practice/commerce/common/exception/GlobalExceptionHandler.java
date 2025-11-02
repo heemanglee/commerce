@@ -4,6 +4,7 @@ import com.practice.commerce.domain.category.exception.DuplicateCategoryNameExce
 import com.practice.commerce.domain.category.exception.NotFoundCategoryException;
 import com.practice.commerce.domain.product.exception.DuplicateProductException;
 import com.practice.commerce.domain.product.exception.InvalidProductMediaException;
+import com.practice.commerce.domain.product.exception.NotFoundProductException;
 import com.practice.commerce.domain.user.exception.DuplicateUserEmailException;
 import com.practice.commerce.domain.user.exception.DuplicateUserNameException;
 import com.practice.commerce.domain.user.exception.NotFoundUserException;
@@ -95,5 +96,14 @@ public class GlobalExceptionHandler {
                 ex.getMessage()
         );
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    }
+
+    @ExceptionHandler(NotFoundProductException.class)
+    public ResponseEntity<ErrorResponse> handleNotFoundProductException(NotFoundProductException ex) {
+        ErrorResponse errorResponse = new ErrorResponse(
+                "PRODUCT_NOT_FOUND",
+                ex.getMessage()
+        );
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
     }
 }

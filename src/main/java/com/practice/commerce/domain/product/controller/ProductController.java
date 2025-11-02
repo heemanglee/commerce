@@ -53,12 +53,13 @@ public class ProductController {
     }
 
     @PreAuthorize("hasRole('SELLER')")
-    @PatchMapping("/{productId}/media/reorder")
-    public ResponseEntity<Void> updateMediaOrder(
+    @PatchMapping("/{productId}/media")
+    public ResponseEntity<Void> updateProductMedia(
             @PathVariable UUID productId,
-            @Valid @RequestBody ReorderMediaRequest request
+            @RequestPart(value = "data", required = false) ReorderMediaRequest request,
+            @RequestPart(value = "files", required = false) List<MultipartFile> files
     ) {
-        productService.updateMediaPositions(productId, request.mediaPositions());
+        productService.updateProductMedia(productId, request == null ? null : request.mediaPositions(), files);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
