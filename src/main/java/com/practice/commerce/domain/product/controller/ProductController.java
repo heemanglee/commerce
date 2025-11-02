@@ -1,6 +1,7 @@
 package com.practice.commerce.domain.product.controller;
 
 import com.practice.commerce.domain.product.controller.request.CreateProductRequest;
+import com.practice.commerce.domain.product.controller.request.ReorderMediaRequest;
 import com.practice.commerce.domain.product.controller.response.CreateProductResponse;
 import com.practice.commerce.domain.product.controller.response.GetProductResponse;
 import com.practice.commerce.domain.product.service.ProductService;
@@ -17,8 +18,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
@@ -47,6 +50,16 @@ public class ProductController {
                 files
         );
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @PreAuthorize("hasRole('SELLER')")
+    @PatchMapping("/{productId}/media/reorder")
+    public ResponseEntity<Void> updateMediaOrder(
+            @PathVariable UUID productId,
+            @Valid @RequestBody ReorderMediaRequest request
+    ) {
+        productService.updateMediaPositions(productId, request.mediaPositions());
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     @PreAuthorize("hasRole('SELLER')")

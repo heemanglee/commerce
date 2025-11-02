@@ -3,6 +3,7 @@ package com.practice.commerce.common.exception;
 import com.practice.commerce.domain.category.exception.DuplicateCategoryNameException;
 import com.practice.commerce.domain.category.exception.NotFoundCategoryException;
 import com.practice.commerce.domain.product.exception.DuplicateProductException;
+import com.practice.commerce.domain.product.exception.InvalidProductMediaException;
 import com.practice.commerce.domain.user.exception.DuplicateUserEmailException;
 import com.practice.commerce.domain.user.exception.DuplicateUserNameException;
 import com.practice.commerce.domain.user.exception.NotFoundUserException;
@@ -82,6 +83,15 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleFileUploadException(FileUploadException ex) {
         ErrorResponse errorResponse = new ErrorResponse(
                 "FILE_UPLOAD_ERROR",
+                ex.getMessage()
+        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    }
+
+    @ExceptionHandler(InvalidProductMediaException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidProductMediaException(InvalidProductMediaException ex) {
+        ErrorResponse errorResponse = new ErrorResponse(
+                "INVALID_PRODUCT_MEDIA_ERROR",
                 ex.getMessage()
         );
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);

@@ -72,4 +72,8 @@ public class ProductMedia extends BaseEntity {
         this.width = width;
         this.height = height;
     }
+
+    public void updatePosition(int newPosition) {
+        this.position = newPosition;
+    }
 }
