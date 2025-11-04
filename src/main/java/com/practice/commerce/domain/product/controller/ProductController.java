@@ -1,6 +1,7 @@
 package com.practice.commerce.domain.product.controller;
 
 import com.practice.commerce.domain.product.controller.request.CreateProductRequest;
+import com.practice.commerce.domain.product.controller.request.DeleteProductMediaRequest;
 import com.practice.commerce.domain.product.controller.request.ReorderMediaRequest;
 import com.practice.commerce.domain.product.controller.response.CreateProductResponse;
 import com.practice.commerce.domain.product.controller.response.GetProductResponse;
@@ -17,6 +18,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -60,6 +62,16 @@ public class ProductController {
             @RequestPart(value = "files", required = false) List<MultipartFile> files
     ) {
         productService.updateProductMedia(productId, request == null ? null : request.mediaPositions(), files);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @PreAuthorize("hasRole('SELLER')")
+    @DeleteMapping("/{productId}/media")
+    public ResponseEntity<Void> deleteProductMedia(
+            @PathVariable UUID productId,
+            @Valid @RequestBody DeleteProductMediaRequest request
+    ) {
+        productService.deleteProductMedia(productId, request.medias());
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 

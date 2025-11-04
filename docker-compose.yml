@@ -31,5 +31,23 @@ services:
       - redis-server
     restart: always
 
+  localstack:
+    image: localstack/localstack:latest
+    container_name: localstack-commerce
+    ports:
+      - "4566:4566"            # LocalStack Gateway
+    environment:
+      - SERVICES=sqs           # SQS만 활성화
+      - DEBUG=1                # 디버그 로그 활성화
+      - PERSISTENCE=1          # 재시작 시 데이터 유지
+      - AWS_DEFAULT_REGION=ap-northeast-2
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+    volumes:
+      - "${TMPDIR:-/tmp}/localstack:/var/lib/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "./localstack/init:/etc/localstack/init/ready.d"  # 초기화 스크립트
+    restart: always
+
 volumes:
   mysql-volume:

@@ -43,6 +43,7 @@ dependencies {
     // AWS
     implementation platform('software.amazon.awssdk:bom:2.25.50')
     implementation 'software.amazon.awssdk:s3'
+    implementation("software.amazon.awssdk:sqs")
 
     // Retry
     implementation 'org.springframework.retry:spring-retry'

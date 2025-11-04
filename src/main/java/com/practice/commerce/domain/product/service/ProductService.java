@@ -3,6 +3,7 @@ package com.practice.commerce.domain.product.service;
 import com.practice.commerce.domain.category.entity.Category;
 import com.practice.commerce.domain.category.exception.NotFoundCategoryException;
 import com.practice.commerce.domain.category.repository.CategoryRepository;
+import com.practice.commerce.domain.product.controller.request.DeleteProductMediaRequest.DeleteMedia;
 import com.practice.commerce.domain.product.controller.request.ReorderMediaRequest.MediaPosition;
 import com.practice.commerce.domain.product.controller.response.CreateProductResponse;
 import com.practice.commerce.domain.product.controller.response.GetProductResponse;
@@ -18,17 +19,21 @@ import com.practice.commerce.domain.user.entity.User;
 import com.practice.commerce.domain.user.exception.NotFoundUserException;
 import com.practice.commerce.domain.user.repository.UserRepository;
 import com.practice.commerce.infrastructure.s3.S3UploadService;
+import com.practice.commerce.infrastructure.message.MessageQueueService;
+import com.practice.commerce.infrastructure.message.S3DeletionMessage;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class ProductService {
@@ -38,6 +43,7 @@ public class ProductService {
     private final UserRepository userRepository;
     private final S3UploadService s3UploadService;
     private final ProductMediaRepository productMediaRepository;
+    private final MessageQueueService messageQueueService;
 
     private static final int TEMP_POSITION_START = 1000;
 
@@ -105,6 +111,42 @@ public class ProductService {
                 "INVALID_REQUEST",
                 "새로운 이미지 또는 순서 정보 중 하나는 제공되어야 합니다."
         );
+    }
+
+    @Transactional
+    public void deleteProductMedia(UUID productId, List<DeleteMedia> medias) {
+        List<UUID> mediaIdsToDelete = medias.stream()
+                .map(DeleteMedia::id)
+                .toList();
+
+        // 삭제 요청한 미디어가 모두 상품에 포함되는지 확인
+        List<ProductMedia> productMedias = productMediaRepository.findByProductId(productId);
+        List<ProductMedia> mediaToDelete = productMedias.stream()
+                .filter(media -> mediaIdsToDelete.contains(media.getId()))
+                .toList();
+
+        if (mediaToDelete.size() != mediaIdsToDelete.size()) {
+            throw new InvalidProductMediaException(
+                    "MEDIA_NOT_BELONG_TO_PRODUCT",
+                    "요청된 이미지 중 일부가 해당 상품에 포함되어 있지 않습니다."
+            );
+        }
+
+        // 미디어 삭제 처리
+        mediaToDelete.forEach(ProductMedia::markAsDeleted);
+
+        // SQS에 S3 삭제 메시지 발행
+        List<S3DeletionMessage> deletionMessages = mediaToDelete.stream()
+                .map(media -> S3DeletionMessage.builder()
+                        .mediaId(media.getId())
+                        .bucketName(media.getBucketName())
+                        .bucketKey(media.getBucketObjectKey())
+                        .retryCount(0)
+                        .build()
+                )
+                .toList();
+
+        messageQueueService.sendS3DeletionMessages(deletionMessages);
     }
 
     private void updatePosition(List<MediaPosition> mediaPositions, Product product) {

@@ -61,6 +61,9 @@ public class ProductMedia extends BaseEntity {
     private Integer width;
     private Integer height;
 
+    @Column(name = "deleted_at")
+    private java.time.LocalDateTime deletedAt;
+
     @Builder
     public ProductMedia(Product product, MediaType mediaType, String bucketName, String bucketKey, int position,
                         Integer width, Integer height) {
@@ -75,5 +78,17 @@ public class ProductMedia extends BaseEntity {
 
     public void updatePosition(int newPosition) {
         this.position = newPosition;
+    }
+
+    public void markAsDeleted() {
+        this.deletedAt = java.time.LocalDateTime.now();
+    }
+
+    public boolean isDeleted() {
+        return this.deletedAt != null;
+    }
+
+    public String getBucketObjectKey() {
+        return this.bucketKey;
     }
 }

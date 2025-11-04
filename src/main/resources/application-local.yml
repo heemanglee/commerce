@@ -34,7 +34,22 @@ logging:
     org.springframework.web: INFO
     org.hibernate.SQL: DEBUG
 
+cloud:
+  aws:
+    credentials:
+      access-key: test
+      secret-key: test
+    region:
+      static: ap-northeast-2
+    sqs:
+      endpoint: http://localhost:4566  # LocalStack 엔드포인트
+    stack:
+      auto: false
+
 app:
   aws:
     bucket: ${AWS_BUCKET_NAME}
     region: ${AWS_REGION:ap-northeast-2}
+  queue:
+    sqs: http://sqs.ap-northeast-2.localhost.localstack.cloud:4566/000000000000/sqs-commerce
+    dlq: http://sqs.ap-northeast-2.localhost.localstack.cloud:4566/000000000000/dlq-commerce
