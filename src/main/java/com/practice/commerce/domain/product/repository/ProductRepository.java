@@ -22,4 +22,6 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
     Optional<Product> findProductById(UUID productId);
 
     List<Product> seller(User seller);
+
+    Optional<Product> findProductByIdAndSellerId(UUID productId, UUID sellerId);
 }

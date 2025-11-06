@@ -12,6 +12,7 @@ import com.practice.commerce.domain.product.controller.response.GetProductRespon
 import com.practice.commerce.domain.product.entity.Product;
 import com.practice.commerce.domain.product.entity.ProductMedia;
 import com.practice.commerce.domain.product.entity.ProductStatus;
+import com.practice.commerce.domain.product.event.ProductMediaDeletedEvent;
 import com.practice.commerce.domain.product.exception.DuplicateProductException;
 import com.practice.commerce.domain.product.exception.InvalidProductMediaException;
 import com.practice.commerce.domain.product.exception.NotFoundProductException;
@@ -29,6 +30,7 @@ import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -46,6 +48,7 @@ public class ProductService {
     private final S3UploadService s3UploadService;
     private final ProductMediaRepository productMediaRepository;
     private final MessageQueueService messageQueueService;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     private static final int TEMP_POSITION_START = 1000;
     private final ProductMediaService productMediaService;
@@ -154,13 +157,14 @@ public class ProductService {
 
     @Transactional
     public void deleteProduct(UUID productId, UUID sellerId) {
-        User seller = userRepository.findById(sellerId)
-                .orElseThrow(() -> new NotFoundUserException("판매자 조회 실패. id = " + sellerId));
-        Product product = productRepository.findProductByIdAndSeller(productId, seller)
-                .orElseThrow(() -> new NotFoundProductException("상품 조회 실패. id + " + productId));
+        Product product = productRepository.findProductByIdAndSellerId(productId, sellerId)
+                .orElseThrow(() -> new NotFoundProductException("판매자가 등록한 상품 조회 실패. id = " + productId));
 
         product.updateStatus(STOPPED);
-        productMediaService.deleteProductMedias(product);
+
+        // 상품에 등록된 이미지 삭제
+        List<S3DeletionMessage> deleteMediaMessages = productMediaService.getProductDeleteMessages(product);
+        applicationEventPublisher.publishEvent(new ProductMediaDeletedEvent(deleteMediaMessages));
     }
 
     private void updatePosition(List<MediaPosition> mediaPositions, Product product) {

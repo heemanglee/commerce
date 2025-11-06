@@ -9,7 +9,6 @@ import com.practice.commerce.infrastructure.message.S3DeletionMessage;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
@@ -34,7 +33,7 @@ public class ProductMediaService {
         productMediaRepository.save(productMedia);
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
     public void deleteProductMedias(Product product) {
         List<ProductMedia> productMedias = productMediaRepository.findByProductId(product.getId());
         productMedias.forEach(ProductMedia::markAsDeleted);
@@ -50,5 +49,18 @@ public class ProductMediaService {
                 .toList();
 
         messageQueueService.sendS3DeletionMessages(deleteMessages);
+    }
+
+    public List<S3DeletionMessage> getProductDeleteMessages(Product product) {
+        List<ProductMedia> productMedias = productMediaRepository.findByProductId(product.getId());
+        return productMedias.stream()
+                .map(media -> S3DeletionMessage.builder()
+                        .mediaId(media.getId())
+                        .bucketKey(media.getBucketObjectKey())
+                        .bucketName(media.getBucketName())
+                        .retryCount(0)
+                        .build()
+                )
+                .toList();
     }
 }
