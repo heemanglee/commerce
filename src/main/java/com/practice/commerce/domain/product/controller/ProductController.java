@@ -76,6 +76,16 @@ public class ProductController {
     }
 
     @PreAuthorize("hasRole('SELLER')")
+    @DeleteMapping("/{productId}")
+    public ResponseEntity<Void> deleteProduct(
+            @PathVariable UUID productId,
+            @AuthenticationPrincipal UUID sellerId
+    ) {
+        productService.deleteProduct(productId, sellerId);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @PreAuthorize("hasRole('SELLER')")
     @GetMapping("/{product_id}")
     public ResponseEntity<GetProductResponse> getProduct(
             @PathVariable("product_id") UUID productId

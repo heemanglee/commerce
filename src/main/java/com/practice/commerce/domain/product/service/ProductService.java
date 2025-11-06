@@ -1,5 +1,7 @@
 package com.practice.commerce.domain.product.service;
 
+import static com.practice.commerce.domain.product.entity.ProductStatus.STOPPED;
+
 import com.practice.commerce.domain.category.entity.Category;
 import com.practice.commerce.domain.category.exception.NotFoundCategoryException;
 import com.practice.commerce.domain.category.repository.CategoryRepository;
@@ -18,9 +20,9 @@ import com.practice.commerce.domain.product.repository.ProductRepository;
 import com.practice.commerce.domain.user.entity.User;
 import com.practice.commerce.domain.user.exception.NotFoundUserException;
 import com.practice.commerce.domain.user.repository.UserRepository;
-import com.practice.commerce.infrastructure.s3.S3UploadService;
 import com.practice.commerce.infrastructure.message.MessageQueueService;
 import com.practice.commerce.infrastructure.message.S3DeletionMessage;
+import com.practice.commerce.infrastructure.s3.S3UploadService;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,6 +48,7 @@ public class ProductService {
     private final MessageQueueService messageQueueService;
 
     private static final int TEMP_POSITION_START = 1000;
+    private final ProductMediaService productMediaService;
 
     @Transactional
     public CreateProductResponse createProduct(
@@ -147,6 +150,17 @@ public class ProductService {
                 .toList();
 
         messageQueueService.sendS3DeletionMessages(deletionMessages);
+    }
+
+    @Transactional
+    public void deleteProduct(UUID productId, UUID sellerId) {
+        User seller = userRepository.findById(sellerId)
+                .orElseThrow(() -> new NotFoundUserException("판매자 조회 실패. id = " + sellerId));
+        Product product = productRepository.findProductByIdAndSeller(productId, seller)
+                .orElseThrow(() -> new NotFoundProductException("상품 조회 실패. id + " + productId));
+
+        product.updateStatus(STOPPED);
+        productMediaService.deleteProductMedias(product);
     }
 
     private void updatePosition(List<MediaPosition> mediaPositions, Product product) {
