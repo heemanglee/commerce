@@ -10,12 +10,14 @@ import com.practice.commerce.domain.product.controller.request.ReorderMediaReque
 import com.practice.commerce.domain.product.controller.response.CreateProductResponse;
 import com.practice.commerce.domain.product.controller.response.GetProductResponse;
 import com.practice.commerce.domain.product.entity.Product;
+import com.practice.commerce.domain.product.entity.ProductCategory;
 import com.practice.commerce.domain.product.entity.ProductMedia;
 import com.practice.commerce.domain.product.entity.ProductStatus;
 import com.practice.commerce.domain.product.event.ProductMediaDeletedEvent;
 import com.practice.commerce.domain.product.exception.DuplicateProductException;
 import com.practice.commerce.domain.product.exception.InvalidProductMediaException;
 import com.practice.commerce.domain.product.exception.NotFoundProductException;
+import com.practice.commerce.domain.product.repository.ProductCategoryRepository;
 import com.practice.commerce.domain.product.repository.ProductMediaRepository;
 import com.practice.commerce.domain.product.repository.ProductRepository;
 import com.practice.commerce.domain.user.entity.User;
@@ -45,6 +47,7 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
+    private final ProductCategoryRepository productCategoryRepository;
     private final S3UploadService s3UploadService;
     private final ProductMediaRepository productMediaRepository;
     private final MessageQueueService messageQueueService;
@@ -74,6 +77,12 @@ public class ProductService {
                 .status(status)
                 .build();
         Product savedProduct = productRepository.save(product);
+
+        ProductCategory productCategory = ProductCategory.builder()
+                .product(product)
+                .category(category)
+                .build();
+        productCategoryRepository.save(productCategory);
 
         // 이미지 업로드
         s3UploadService.upload(product, files, 0);
