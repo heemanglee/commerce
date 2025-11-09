@@ -40,7 +40,7 @@ public class Product extends BaseEntity {
     private UUID id;
 
     @Column(nullable = false, length = 25)
-    @Size(max = 25)
+    @Size(max = 100)
     private String name;
 
     @Column(columnDefinition = "TEXT")
