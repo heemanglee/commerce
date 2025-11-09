@@ -51,10 +51,10 @@ public class ProductService {
     private final S3UploadService s3UploadService;
     private final ProductMediaRepository productMediaRepository;
     private final MessageQueueService messageQueueService;
+    private final ProductMediaService productMediaService;
     private final ApplicationEventPublisher applicationEventPublisher;
 
     private static final int TEMP_POSITION_START = 1000;
-    private final ProductMediaService productMediaService;
 
     @Transactional
     public CreateProductResponse createProduct(
@@ -97,10 +97,8 @@ public class ProductService {
     }
 
     @Transactional(readOnly = true)
-    public List<GetProductResponse> getProducts(UUID sellerId, Pageable pageable) {
-        User seller = getSeller(sellerId);
-
-        Page<Product> pageResult = productRepository.findProductsBySeller(seller, pageable);
+    public List<GetProductResponse> searchProducts(UUID categoryId, String search, Pageable pageable) {
+        Page<Product> pageResult = productCategoryRepository.searchProducts(categoryId, search, pageable);
 
         return pageResult.stream()
                 .map(GetProductResponse::of)
@@ -118,14 +116,14 @@ public class ProductService {
             addNewMediaAndUpdatePosition(mediaPositions, files, product);
         } else if (hasMediaPositions) {
             updatePosition(mediaPositions, product);
-        } else {
+        } else if (hasFiles) {
             addNewMediaOnly(product, files);
+        } else {
+            throw new InvalidProductMediaException(
+                    "INVALID_REQUEST",
+                    "새로운 이미지 또는 순서 정보 중 하나는 제공되어야 합니다."
+            );
         }
-
-        throw new InvalidProductMediaException(
-                "INVALID_REQUEST",
-                "새로운 이미지 또는 순서 정보 중 하나는 제공되어야 합니다."
-        );
     }
 
     @Transactional
