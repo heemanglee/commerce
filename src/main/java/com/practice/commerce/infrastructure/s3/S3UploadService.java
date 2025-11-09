@@ -45,8 +45,16 @@ public class S3UploadService {
                 String contentType = getContentType(file);
                 String extension = getExtension(file, contentType);
                 String objectKey = String.format(
-                        "products/%s/images/%02d-%s.%s",
-                        product.getId(), pos + position, UUID.randomUUID(), extension
+                    "products/%s/images/%02d-%s.%s",
+                    product.getId(), pos + position, UUID.randomUUID(), extension
+                );
+
+                // 파일 크기 계산
+                long fileSize = file.getSize();
+                log.info("파일명: {}, 크기: {} bytes ({} MB)",
+                    file.getOriginalFilename(),
+                    fileSize,
+                    fileSize / (1024.0 * 1024.0)
                 );
 
                 // 메타데이터 추출 (width/height)
@@ -56,9 +64,9 @@ public class S3UploadService {
 
                 // DB 저장
                 productMediaService.create(
-                        product, MediaType.IMAGE,
-                        s3Properties.getBucket(), objectKey,
-                        pos + position, meta.width(), meta.height()
+                    product, MediaType.IMAGE,
+                    s3Properties.getBucket(), objectKey,
+                    pos + position, meta.width(), meta.height()
                 );
             }
         } catch (Exception ex) {
@@ -74,16 +82,16 @@ public class S3UploadService {
 
         try {
             var objects = objectKeys.stream()
-                    .map(objectKey -> ObjectIdentifier.builder().key(objectKey).build())
-                    .toList();
+                .map(objectKey -> ObjectIdentifier.builder().key(objectKey).build())
+                .toList();
 
             DeleteObjectsRequest deleteObjectsRequest = DeleteObjectsRequest.builder()
-                    .bucket(s3Properties.getBucket())
-                    .delete(
-                            Delete.builder()
-                                    .objects(objects)
-                                    .build())
-                    .build();
+                .bucket(s3Properties.getBucket())
+                .delete(
+                    Delete.builder()
+                        .objects(objects)
+                        .build())
+                .build();
 
             s3.deleteObjects(deleteObjectsRequest);
             log.warn("업르도된 모든 객체 삭제 성공 : {}", objectKeys.size());
@@ -104,7 +112,7 @@ public class S3UploadService {
 
     private String getContentType(MultipartFile file) {
         return Optional.ofNullable(file.getContentType())
-                .orElse("application/json");
+            .orElse("application/json");
     }
 
     private String getExtension(MultipartFile file, String contentType) {

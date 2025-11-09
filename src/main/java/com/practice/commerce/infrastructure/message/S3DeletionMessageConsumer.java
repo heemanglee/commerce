@@ -43,10 +43,10 @@ public class S3DeletionMessageConsumer {
     public void consumeMessages() {
         try {
             ReceiveMessageRequest receiveRequest = ReceiveMessageRequest.builder()
-                    .queueUrl(queueUrl)
-                    .maxNumberOfMessages(MAX_MESSAGES)
-                    .waitTimeSeconds(WAIT_TIME_SECONDS)
-                    .build();
+                .queueUrl(queueUrl)
+                .maxNumberOfMessages(MAX_MESSAGES)
+                .waitTimeSeconds(WAIT_TIME_SECONDS)
+                .build();
 
             ReceiveMessageResponse response = sqsClient.receiveMessage(receiveRequest);
             List<Message> messages = response.messages();
@@ -68,23 +68,23 @@ public class S3DeletionMessageConsumer {
         try {
             // 메시지 파싱
             S3DeletionMessage deletionMessage = objectMapper.readValue(
-                    message.body(),
-                    S3DeletionMessage.class
+                message.body(),
+                S3DeletionMessage.class
             );
 
             log.info("SQS 메시지 삭제: mediaId={}, bucketKey={}",
-                    deletionMessage.getMediaId(), deletionMessage.getBucketKey());
+                deletionMessage.getMediaId(), deletionMessage.getBucketKey());
 
             boolean deleted = s3DeleteService.deleteFile(
-                    deletionMessage.getBucketName(),
-                    deletionMessage.getBucketKey()
+                deletionMessage.getBucketName(),
+                deletionMessage.getBucketKey()
             );
 
             if (deleted) {
                 // S3 삭제 성공 시 DB에서 hard delete
                 productMediaRepository.deleteById(deletionMessage.getMediaId());
                 log.info("S3 Object 삭제 완료: mediaId={}, bucketKey={}",
-                        deletionMessage.getMediaId(), deletionMessage.getBucketKey());
+                    deletionMessage.getMediaId(), deletionMessage.getBucketKey());
 
                 deleteMessageFromQueue(message);
             } else {
@@ -104,16 +104,16 @@ public class S3DeletionMessageConsumer {
             deleteMessageFromQueue(message);
         } else {
             log.warn("SQS 메시지 삭제 재시도: mediaId={}, retryCount={}",
-                    deletionMessage.getMediaId(), currentRetryCount);
+                deletionMessage.getMediaId(), currentRetryCount);
         }
     }
 
     private void deleteMessageFromQueue(Message message) {
         try {
             DeleteMessageRequest deleteRequest = DeleteMessageRequest.builder()
-                    .queueUrl(queueUrl)
-                    .receiptHandle(message.receiptHandle())
-                    .build();
+                .queueUrl(queueUrl)
+                .receiptHandle(message.receiptHandle())
+                .build();
 
             sqsClient.deleteMessage(deleteRequest);
             log.debug("SQS 메시지 삭제 완료: messageId={}", message.messageId());
