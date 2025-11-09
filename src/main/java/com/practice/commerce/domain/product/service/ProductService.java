@@ -58,30 +58,30 @@ public class ProductService {
 
     @Transactional
     public CreateProductResponse createProduct(
-            String name,
-            String description,
-            UUID sellerId,
-            UUID categoryId,
-            ProductStatus status,
-            List<MultipartFile> files
+        String name,
+        String description,
+        UUID sellerId,
+        UUID categoryId,
+        ProductStatus status,
+        List<MultipartFile> files
     ) {
         User seller = getSeller(sellerId);
         validateDuplicateProduct(name, seller);
 
         Category category = categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new NotFoundCategoryException("카테고리 조회에 실패했습니다. id = " + categoryId));
+            .orElseThrow(() -> new NotFoundCategoryException("카테고리 조회에 실패했습니다. id = " + categoryId));
         Product product = Product.builder()
-                .name(name)
-                .description(description)
-                .seller(seller)
-                .status(status)
-                .build();
+            .name(name)
+            .description(description)
+            .seller(seller)
+            .status(status)
+            .build();
         Product savedProduct = productRepository.save(product);
 
         ProductCategory productCategory = ProductCategory.builder()
-                .product(product)
-                .category(category)
-                .build();
+            .product(product)
+            .category(category)
+            .build();
         productCategoryRepository.save(productCategory);
 
         // 이미지 업로드
@@ -101,8 +101,8 @@ public class ProductService {
         Page<Product> pageResult = productCategoryRepository.searchProducts(categoryId, search, pageable);
 
         return pageResult.stream()
-                .map(GetProductResponse::of)
-                .toList();
+            .map(GetProductResponse::of)
+            .toList();
     }
 
     @Transactional
@@ -120,8 +120,8 @@ public class ProductService {
             addNewMediaOnly(product, files);
         } else {
             throw new InvalidProductMediaException(
-                    "INVALID_REQUEST",
-                    "새로운 이미지 또는 순서 정보 중 하나는 제공되어야 합니다."
+                "INVALID_REQUEST",
+                "새로운 이미지 또는 순서 정보 중 하나는 제공되어야 합니다."
             );
         }
     }
@@ -129,35 +129,32 @@ public class ProductService {
     @Transactional
     public void deleteProductMedia(UUID productId, List<DeleteMedia> medias) {
         List<UUID> mediaIdsToDelete = medias.stream()
-                .map(DeleteMedia::id)
-                .toList();
+            .map(DeleteMedia::id)
+            .toList();
 
         // 삭제 요청한 미디어가 모두 상품에 포함되는지 확인
         List<ProductMedia> productMedias = productMediaRepository.findByProductId(productId);
         List<ProductMedia> mediaToDelete = productMedias.stream()
-                .filter(media -> mediaIdsToDelete.contains(media.getId()))
-                .toList();
+            .filter(media -> mediaIdsToDelete.contains(media.getId()))
+            .toList();
 
         if (mediaToDelete.size() != mediaIdsToDelete.size()) {
             throw new InvalidProductMediaException(
-                    "MEDIA_NOT_BELONG_TO_PRODUCT",
-                    "요청된 이미지 중 일부가 해당 상품에 포함되어 있지 않습니다."
+                "MEDIA_NOT_BELONG_TO_PRODUCT",
+                "요청된 이미지 중 일부가 해당 상품에 포함되어 있지 않습니다."
             );
         }
 
-        // 미디어 삭제 처리
-        mediaToDelete.forEach(ProductMedia::markAsDeleted);
-
         // SQS에 S3 삭제 메시지 발행
         List<S3DeletionMessage> deletionMessages = mediaToDelete.stream()
-                .map(media -> S3DeletionMessage.builder()
-                        .mediaId(media.getId())
-                        .bucketName(media.getBucketName())
-                        .bucketKey(media.getBucketObjectKey())
-                        .retryCount(0)
-                        .build()
-                )
-                .toList();
+            .map(media -> S3DeletionMessage.builder()
+                .mediaId(media.getId())
+                .bucketName(media.getBucketName())
+                .bucketKey(media.getBucketObjectKey())
+                .retryCount(0)
+                .build()
+            )
+            .toList();
 
         messageQueueService.sendS3DeletionMessages(deletionMessages);
     }
@@ -165,9 +162,11 @@ public class ProductService {
     @Transactional
     public void deleteProduct(UUID productId, UUID sellerId) {
         Product product = productRepository.findProductByIdAndSellerId(productId, sellerId)
-                .orElseThrow(() -> new NotFoundProductException("판매자가 등록한 상품 조회 실패. id = " + productId));
+            .orElseThrow(() -> new NotFoundProductException("판매자가 등록한 상품 조회 실패. id = " + productId));
 
+        // 상품 삭제
         product.updateStatus(STOPPED);
+        product.markAsDeleted();
 
         // 상품에 등록된 이미지 삭제
         List<S3DeletionMessage> deleteMediaMessages = productMediaService.getProductDeleteMessages(product);
@@ -189,7 +188,7 @@ public class ProductService {
 
     private Product getProductById(UUID productId) {
         return productRepository.findById(productId)
-                .orElseThrow(() -> new NotFoundProductException("상품 조회에 실패했습니다. id = " + productId));
+            .orElseThrow(() -> new NotFoundProductException("상품 조회에 실패했습니다. id = " + productId));
     }
 
     private boolean hasMediaPositions(List<MediaPosition> mediaPositions) {
@@ -228,7 +227,7 @@ public class ProductService {
 
     private User getSeller(UUID sellerId) {
         return userRepository.findById(sellerId)
-                .orElseThrow(() -> new NotFoundUserException("판매자 조회에 실패했습니다. id = " + sellerId));
+            .orElseThrow(() -> new NotFoundUserException("판매자 조회에 실패했습니다. id = " + sellerId));
     }
 
     private void validateDuplicateProduct(String name, User seller) throws DuplicateProductException {
@@ -240,8 +239,8 @@ public class ProductService {
 
     private List<ProductMedia> getAndValidateProductMedias(UUID productId, List<MediaPosition> mediaPositions) {
         List<UUID> mediaIds = mediaPositions.stream()
-                .map(MediaPosition::id)
-                .toList();
+            .map(MediaPosition::id)
+            .toList();
 
         // 요청된 이미지가 상품에 포함되는지 검증
         List<ProductMedia> productMedias = productMediaRepository.findByProductId(productId);
@@ -256,22 +255,22 @@ public class ProductService {
     ) {
         if (mediaIds.size() != productMedias.size()) {
             throw new InvalidProductMediaException(
-                    "MEDIA_NOT_BELONG_TO_PRODUCT",
-                    "요청된 이미지 중 일부가 해당 상품에 포함되어 있지 않습니다."
+                "MEDIA_NOT_BELONG_TO_PRODUCT",
+                "요청된 이미지 중 일부가 해당 상품에 포함되어 있지 않습니다."
             );
         }
 
         // position 검증: 0부터 연속적이고 중복이 없는지
         List<Integer> positions = mediaPositions.stream()
-                .map(MediaPosition::position)
-                .sorted()
-                .toList();
+            .map(MediaPosition::position)
+            .sorted()
+            .toList();
 
         for (int i = 0; i < positions.size(); i++) {
             if (positions.get(i) != i) {
                 throw new InvalidProductMediaException(
-                        "INVALID_MEDIA_POSITION",
-                        String.format("position은 0부터 연속적이어야 합니다. 예상: %d, 실제: %d", i, positions.get(i))
+                    "INVALID_MEDIA_POSITION",
+                    String.format("position은 0부터 연속적이어야 합니다. 예상: %d, 실제: %d", i, positions.get(i))
                 );
             }
         }

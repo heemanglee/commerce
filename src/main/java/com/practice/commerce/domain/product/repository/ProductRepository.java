@@ -15,13 +15,5 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
 
     boolean existsBySellerAndName(User seller, String name);
 
-    Optional<Product> findProductByIdAndSeller(UUID productId, User seller);
-
-    Page<Product> findProductsBySeller(User seller, Pageable pageable);
-
-    Optional<Product> findProductById(UUID productId);
-
-    List<Product> seller(User seller);
-
     Optional<Product> findProductByIdAndSellerId(UUID productId, UUID sellerId);
 }

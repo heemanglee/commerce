@@ -25,12 +25,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Entity
 @Table(
-        uniqueConstraints = {
-                @UniqueConstraint(
-                        name = "uk_seller_name",
-                        columnNames = {"seller_id", "name"}
-                )
-        }
+    uniqueConstraints = {
+        @UniqueConstraint(
+            name = "uk_seller_name",
+            columnNames = {"seller_id", "name"}
+        )
+    }
 )
 public class Product extends BaseEntity {
 
@@ -48,10 +48,10 @@ public class Product extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(
-            name = "seller_id",
-            referencedColumnName = "id",
-            columnDefinition = "BINARY(16)",
-            foreignKey = @ForeignKey(name = "fk_product_seller")
+        name = "seller_id",
+        referencedColumnName = "id",
+        columnDefinition = "BINARY(16)",
+        foreignKey = @ForeignKey(name = "fk_product_seller")
     )
     private User seller;
 
@@ -71,5 +71,9 @@ public class Product extends BaseEntity {
 
     public void updateStatus(ProductStatus status) {
         this.status = status;
+    }
+
+    public void markAsDeleted() {
+        this.deletedAt = Instant.now();
     }
 }

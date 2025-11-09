@@ -9,7 +9,6 @@ import com.practice.commerce.infrastructure.message.S3DeletionMessage;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
 @Service
@@ -22,45 +21,27 @@ public class ProductMediaService {
                        String bucketName, String objectKey, int pos,
                        int width, int height) {
         ProductMedia productMedia = ProductMedia.builder()
-                .product(product)
-                .mediaType(mediaType)
-                .bucketName(bucketName)
-                .bucketKey(objectKey)
-                .position(pos)
-                .width(width)
-                .height(height)
-                .build();
+            .product(product)
+            .mediaType(mediaType)
+            .bucketName(bucketName)
+            .bucketKey(objectKey)
+            .position(pos)
+            .width(width)
+            .height(height)
+            .build();
         productMediaRepository.save(productMedia);
-    }
-
-    @Transactional
-    public void deleteProductMedias(Product product) {
-        List<ProductMedia> productMedias = productMediaRepository.findByProductId(product.getId());
-        productMedias.forEach(ProductMedia::markAsDeleted);
-
-        List<S3DeletionMessage> deleteMessages = productMedias.stream()
-                .map(media -> S3DeletionMessage.builder()
-                        .mediaId(media.getId())
-                        .bucketKey(media.getBucketObjectKey())
-                        .bucketName(media.getBucketName())
-                        .retryCount(0)
-                        .build()
-                )
-                .toList();
-
-        messageQueueService.sendS3DeletionMessages(deleteMessages);
     }
 
     public List<S3DeletionMessage> getProductDeleteMessages(Product product) {
         List<ProductMedia> productMedias = productMediaRepository.findByProductId(product.getId());
         return productMedias.stream()
-                .map(media -> S3DeletionMessage.builder()
-                        .mediaId(media.getId())
-                        .bucketKey(media.getBucketObjectKey())
-                        .bucketName(media.getBucketName())
-                        .retryCount(0)
-                        .build()
-                )
-                .toList();
+            .map(media -> S3DeletionMessage.builder()
+                .mediaId(media.getId())
+                .bucketKey(media.getBucketObjectKey())
+                .bucketName(media.getBucketName())
+                .retryCount(0)
+                .build()
+            )
+            .toList();
     }
 }
