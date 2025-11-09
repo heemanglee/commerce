@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface CategoryRepository extends JpaRepository<Category, UUID> {
-    Optional<Category> findByParentId_Id(UUID parentId);
+    Optional<Category> findByParentId(UUID parentId);
 
-    boolean existsByNameAndParentId(String name, Category parent);
+    boolean existsByName(String name);
 }
