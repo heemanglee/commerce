@@ -9,13 +9,16 @@ import com.practice.commerce.domain.user.exception.DuplicateUserEmailException;
 import com.practice.commerce.domain.user.exception.DuplicateUserNameException;
 import com.practice.commerce.domain.user.exception.NotFoundUserException;
 import com.practice.commerce.infrastructure.s3.exception.FileUploadException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -129,5 +132,15 @@ public class GlobalExceptionHandler {
             errorMessage
         );
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ErrorResponse> handleMaxUploadSizeExceededException(MaxUploadSizeExceededException ex) {
+
+        ErrorResponse errorResponse = new ErrorResponse(
+            "FILE_SIZE_EXCEEDED",
+            "파일 크기가 허용된 최대 크기를 초과했습니다."
+        );
+        return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE).body(errorResponse);
     }
 }
